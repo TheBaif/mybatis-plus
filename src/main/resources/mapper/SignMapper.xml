@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.study.mybatisplus.mapper.SignMapper">
+    <select id="list" resultType="com.study.mybatisplus.domain.Sign">
+        SELECT * FROM sign
+        <where>
+            <if test="parentId != null">
+                AND parentId = #{parentId}
+            </if>
+            <if test="childId != null">
+                AND childId = #{childId}
+            </if>
+        </where>
+        ORDER BY id ASC
+    </select>
+
+    <select id="selectBasicSigns" resultType="com.study.mybatisplus.domain.Sign">
+        SELECT * FROM sign
+        WHERE difficulty = 'BEGINNER'
+        ORDER BY id ASC
+            LIMIT #{limit}
+    </select>
+
+    <select id="selectIntermediateSigns" resultType="com.study.mybatisplus.domain.Sign">
+        SELECT * FROM sign
+        WHERE difficulty = 'INTERMEDIATE'
+        ORDER BY id ASC
+            LIMIT #{limit}
+    </select>
+
+    <select id="selectAdvancedSigns" resultType="com.study.mybatisplus.domain.Sign">
+        SELECT * FROM sign
+        WHERE difficulty = 'ADVANCED'
+        ORDER BY id ASC
+            LIMIT #{limit}
+    </select>
+</mapper>
