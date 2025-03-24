@@ -12,7 +12,7 @@ import com.aliyun.oss.model.*;
 public class AliOssUtil {
     public static String uploadFile(String objectName, InputStream in) throws Exception {
         // Endpoint以华东1（杭州）为例，其它Region请按实际情况填写。
-        String endpoint = "https://oss-cn-beijing.aliyuncs.com";
+        String endpoint = "http://oss-cn-beijing.aliyuncs.com";
         // 从环境变量中获取访问凭证。运行本代码示例之前，请确保已设置环境变量OSS_ACCESS_KEY_ID和OSS_ACCESS_KEY_SECRET。
         EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
         // 填写Bucket名称，例如examplebucket。

@@ -44,6 +44,7 @@ public class RecommendationController {
         return Result.success();
     }
 
+
     @GetMapping("/progress")
     public Result<LearningProgressSummary> getUserProgress() {
         Map<String, Object> claims = ThreadLocalUtil.get();
