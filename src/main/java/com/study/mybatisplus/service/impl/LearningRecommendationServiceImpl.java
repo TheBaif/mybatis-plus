@@ -9,6 +9,7 @@ import com.study.mybatisplus.dto.WeeklyLearningData;
 import com.study.mybatisplus.mapper.SignMapper;
 import com.study.mybatisplus.mapper.UserLearningRecordMapper;
 import com.study.mybatisplus.service.LearningRecommendationService;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -145,6 +146,11 @@ public class LearningRecommendationServiceImpl implements LearningRecommendation
 
     @Override
     public void updateLearningRecord(Integer userId, Integer signId, Boolean isCorrect) {
+        // Check parameters
+        if (userId == null || signId == null) {
+            throw new RuntimeException("用户ID和手语ID不能为空");
+        }
+
         LambdaQueryWrapper<UserLearningRecord> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserLearningRecord::getUserId, userId)
                 .eq(UserLearningRecord::getSignId, signId);
@@ -152,7 +158,7 @@ public class LearningRecommendationServiceImpl implements LearningRecommendation
         UserLearningRecord record = learningRecordMapper.selectOne(wrapper);
 
         if (record == null) {
-            // 创建新记录
+            // Create new record
             record = new UserLearningRecord();
             record.setUserId(userId);
             record.setSignId(signId);
@@ -165,27 +171,27 @@ public class LearningRecommendationServiceImpl implements LearningRecommendation
 
             learningRecordMapper.insert(record);
         } else {
-            // 更新现有记录
+            // Update existing record
             record.setViewCount(record.getViewCount() + 1);
             record.setLastViewTime(LocalDateTime.now());
 
-            // 更新熟练度分数
+            // Update proficiency score
             int proficiencyDelta = 0;
             if (isCorrect != null) {
-                // 如果提供了测验结果，根据结果调整分数
+                // If quiz result is provided, adjust score accordingly
                 proficiencyDelta = isCorrect ? 5 : -2;
 
-                // 更新测验准确率
+                // Update quiz accuracy
                 double currentAccuracy = record.getQuizAccuracy() != null ? record.getQuizAccuracy() : 0;
-                int quizCount = record.getViewCount(); // 假设每次查看都有一次测验
+                int quizCount = record.getViewCount(); // Assuming each view has one quiz
                 double newAccuracy = (currentAccuracy * (quizCount - 1) + (isCorrect ? 1 : 0)) / quizCount;
                 record.setQuizAccuracy(newAccuracy);
             } else {
-                // 仅查看，小幅增加熟练度
+                // Just viewing, small increase in proficiency
                 proficiencyDelta = 1;
             }
 
-            // 确保熟练度在0-100范围内
+            // Ensure proficiency stays within 0-100 range
             int newProficiency = Math.min(100, Math.max(0, record.getProficiencyScore() + proficiencyDelta));
             record.setProficiencyScore(newProficiency);
 
@@ -239,7 +245,7 @@ public class LearningRecommendationServiceImpl implements LearningRecommendation
         return summary;
     }
 
-    @Override
+    @Resource
     public UserLearningStatistics getUserLearningStatistics(Integer userId) {
         // 获取用户的所有学习记录
         List<UserLearningRecord> records = learningRecordMapper.selectByUserId(userId);
@@ -396,5 +402,69 @@ public class LearningRecommendationServiceImpl implements LearningRecommendation
         }
 
         return weeklyData;
+    }
+    public void updateLearningRecordExtended(Integer userId, Integer signId, Boolean isCorrect, Boolean extendedView) {
+        // Check parameters
+        if (userId == null || signId == null) {
+            throw new RuntimeException("用户ID和手语ID不能为空");
+        }
+
+        LambdaQueryWrapper<UserLearningRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserLearningRecord::getUserId, userId)
+                .eq(UserLearningRecord::getSignId, signId);
+
+        UserLearningRecord record = learningRecordMapper.selectOne(wrapper);
+
+        if (record == null) {
+            // Create new record
+            record = new UserLearningRecord();
+            record.setUserId(userId);
+            record.setSignId(signId);
+
+            // Extended view gives higher initial proficiency
+            int initialScore = 10; // default
+            if (isCorrect != null && isCorrect) initialScore = 30;
+            if (extendedView != null && extendedView) initialScore += 5;
+
+            record.setProficiencyScore(initialScore);
+            record.setViewCount(1);
+            record.setQuizAccuracy(isCorrect != null ? (isCorrect ? 1.0 : 0.0) : null);
+            record.setLastViewTime(LocalDateTime.now());
+            record.setCreateTime(LocalDateTime.now());
+            record.setUpdateTime(LocalDateTime.now());
+
+            learningRecordMapper.insert(record);
+        } else {
+            // Update existing record
+            record.setViewCount(record.getViewCount() + 1);
+            record.setLastViewTime(LocalDateTime.now());
+
+            // Calculate proficiency increase
+            int proficiencyDelta = 0;
+
+            if (isCorrect != null) {
+                // Quiz result provided
+                proficiencyDelta = isCorrect ? 5 : -2;
+
+                // Update quiz accuracy
+                double currentAccuracy = record.getQuizAccuracy() != null ? record.getQuizAccuracy() : 0;
+                int quizCount = record.getViewCount();
+                double newAccuracy = (currentAccuracy * (quizCount - 1) + (isCorrect ? 1 : 0)) / quizCount;
+                record.setQuizAccuracy(newAccuracy);
+            } else if (extendedView != null && extendedView) {
+                // Extended viewing gives higher proficiency increase
+                proficiencyDelta = 2;
+            } else {
+                // Just regular viewing
+                proficiencyDelta = 1;
+            }
+
+            // Ensure proficiency stays within 0-100 range
+            int newProficiency = Math.min(100, Math.max(0, record.getProficiencyScore() + proficiencyDelta));
+            record.setProficiencyScore(newProficiency);
+            record.setUpdateTime(LocalDateTime.now());
+
+            learningRecordMapper.updateById(record);
+        }
     }
 }

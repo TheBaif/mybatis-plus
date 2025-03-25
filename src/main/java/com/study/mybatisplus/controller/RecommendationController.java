@@ -1,4 +1,4 @@
-// 1. Update RecommendationController.java to properly get userId from username
+// Updated RecommendationController.java to handle extended parameters
 package com.study.mybatisplus.controller;
 
 import com.study.mybatisplus.domain.Result;
@@ -7,6 +7,7 @@ import com.study.mybatisplus.domain.User;
 import com.study.mybatisplus.dto.LearningProgressSummary;
 import com.study.mybatisplus.mapper.UserMapper;
 import com.study.mybatisplus.service.LearningRecommendationService;
+import com.study.mybatisplus.service.impl.LearningRecommendationServiceImpl;
 import com.study.mybatisplus.utils.JwtUtil;
 import com.study.mybatisplus.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,6 @@ public class RecommendationController {
         Map<String, Object> claims = ThreadLocalUtil.get();
         String username = (String) claims.get("username");
 
-        // Get userId from username
         Integer userId = getUserIdFromUsername(username);
         if (userId == null) {
             return Result.error("无法获取用户ID");
@@ -43,18 +43,25 @@ public class RecommendationController {
     @PostMapping("/record")
     public Result recordLearning(
             @RequestParam Integer signId,
-            @RequestParam(required = false) Boolean isCorrect) {
+            @RequestParam(required = false) Boolean isCorrect,
+            @RequestParam(required = false) Boolean extendedView) {
 
         Map<String, Object> claims = ThreadLocalUtil.get();
         String username = (String) claims.get("username");
 
-        // Get userId from username
         Integer userId = getUserIdFromUsername(username);
         if (userId == null) {
             return Result.error("无法获取用户ID");
         }
 
-        recommendationService.updateLearningRecord(userId, signId, isCorrect);
+        // If extended view parameter is provided, use the extended method
+        if (extendedView != null) {
+            ((LearningRecommendationServiceImpl)recommendationService)
+                    .updateLearningRecordExtended(userId, signId, isCorrect, extendedView);
+        } else {
+            recommendationService.updateLearningRecord(userId, signId, isCorrect);
+        }
+
         return Result.success();
     }
 
@@ -63,7 +70,6 @@ public class RecommendationController {
         Map<String, Object> claims = ThreadLocalUtil.get();
         String username = (String) claims.get("username");
 
-        // Get userId from username
         Integer userId = getUserIdFromUsername(username);
         if (userId == null) {
             return Result.error("无法获取用户ID");
@@ -73,7 +79,7 @@ public class RecommendationController {
         return Result.success(summary);
     }
 
-    // Updated method to actually fetch the userId from username
+    // Helper method to get userId from username
     private Integer getUserIdFromUsername(String username) {
         if (username == null || username.isEmpty()) {
             return null;
