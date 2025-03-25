@@ -1,6 +1,5 @@
 package com.study.mybatisplus.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.study.mybatisplus.domain.Sign;
 import com.study.mybatisplus.domain.UserLearningRecord;
 import com.study.mybatisplus.dto.LearningCategoryStats;
@@ -8,20 +7,19 @@ import com.study.mybatisplus.dto.LearningStatisticsDTO;
 import com.study.mybatisplus.dto.WeeklyLearningData;
 import com.study.mybatisplus.mapper.SignMapper;
 import com.study.mybatisplus.mapper.UserLearningRecordMapper;
-import com.study.mybatisplus.service.LearningStatisticsService;
+import com.study.mybatisplus.service.ChildsignService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class LearningStatisticsServiceImpl implements LearningStatisticsService {
+public class LearningStatisticsServiceImpl implements ChildsignService.LearningStatisticsService {
 
     @Autowired
     private UserLearningRecordMapper learningRecordMapper;

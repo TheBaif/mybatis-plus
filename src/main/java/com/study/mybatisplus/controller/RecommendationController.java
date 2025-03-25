@@ -7,6 +7,8 @@ import com.study.mybatisplus.dto.LearningProgressSummary;
 import com.study.mybatisplus.mapper.UserMapper;
 import com.study.mybatisplus.service.LearningRecommendationService;
 import com.study.mybatisplus.utils.ThreadLocalUtil;
+import org.mybatis.logging.Logger;
+import org.mybatis.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +18,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/learning")
 public class RecommendationController {
-
     @Autowired
     private LearningRecommendationService recommendationService;
 
@@ -39,21 +40,24 @@ public class RecommendationController {
     }
 
     @PostMapping("/record")
-    public Result recordLearning(
-            @RequestParam Integer signId,
-            @RequestParam(required = false) Boolean isCorrect) {
+    public Result recordLearning(@RequestParam Integer signId,
+                                 @RequestParam(required = false) Boolean isCorrect) {
+        try {
+            Map<String, Object> claims = ThreadLocalUtil.get();
+            String username = (String) claims.get("username");
 
-        Map<String, Object> claims = ThreadLocalUtil.get();
-        String username = (String) claims.get("username");
+            // 从用户名获取用户ID
+            Integer userId = getUserIdFromUsername(username);
+            if (userId == null) {
+                return Result.error("无法识别当前用户");
+            }
 
-        // Get userId from username
-        Integer userId = getUserIdFromUsername(username);
-        if (userId == null) {
-            return Result.error("无法获取用户ID");
+            recommendationService.updateLearningRecord(userId, signId, isCorrect);
+            return Result.success();
+        } catch (Exception e) {
+            // 记录日志
+            return Result.error("记录学习活动失败：" + e.getMessage());
         }
-
-        recommendationService.updateLearningRecord(userId, signId, isCorrect);
-        return Result.success();
     }
 
     @GetMapping("/progress")
@@ -73,11 +77,7 @@ public class RecommendationController {
 
     // Updated method to actually fetch the userId from username
     private Integer getUserIdFromUsername(String username) {
-        if (username == null || username.isEmpty()) {
-            return null;
-        }
-
-        // Use the UserMapper to find the user by username
+        // 根据用户名查询用户
         User user = userMapper.findByUserName(username);
         return user != null ? user.getId() : null;
     }

@@ -4,7 +4,7 @@ import com.study.mybatisplus.domain.Result;
 import com.study.mybatisplus.domain.User;
 import com.study.mybatisplus.dto.LearningStatisticsDTO;
 import com.study.mybatisplus.mapper.UserMapper;
-import com.study.mybatisplus.service.LearningStatisticsService;
+import com.study.mybatisplus.service.ChildsignService;
 import com.study.mybatisplus.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class LearningStatisticsController {
 
     @Autowired
-    private LearningStatisticsService learningStatisticsService;
+    private ChildsignService.LearningStatisticsService learningStatisticsService;
 
     @Autowired
     private UserMapper userMapper;
