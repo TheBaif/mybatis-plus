@@ -45,22 +45,38 @@ public class UserController {
         }
     @PostMapping("/login")
     public Result login(@Pattern(regexp = "^\\S{5,16}$") String username, @Pattern(regexp = "^\\S{5,16}$") String password) {
-        //判断用户是否存在
-        User loginUser=userService.findByUserName(username);
-        if (loginUser==null)
+        // Log login attempt for debugging
+        System.out.println("Login attempt - Username: " + username);
+
+        // Check if user exists
+        User loginUser = userService.findByUserName(username);
+        if (loginUser == null) {
+            System.out.println("User not found: " + username);
             return Result.error("用户名不存在");
-        //判断密码是否错误
-        if(Md5Util.getMD5String(password).equals(loginUser.getPassword())){
-            Map<String,Object> claims=new HashMap<>();
-            claims.put("username",loginUser.getUsername());
-            claims.put("password",loginUser.getPassword());
-            String token= JwtUtil.genToken(claims);
+        }
+
+        // Check password
+        if (Md5Util.getMD5String(password).equals(loginUser.getPassword())) {
+            // Create claims for JWT
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("username", loginUser.getUsername());
+            claims.put("userId", loginUser.getId());
+
+            // Generate token
+            String token = JwtUtil.genToken(claims);
+            System.out.println("Login successful, token generated: " + token);
+
+            // Store token in Redis with expiration time (12 hours)
             ValueOperations<String, String> operations = stringRedisTemplate.opsForValue();
-            operations.set(token,token,1, TimeUnit.HOURS);
+            operations.set(token, token, 12, TimeUnit.HOURS);
+            System.out.println("Token stored in Redis");
+
             return Result.success(token);
         }
+
+        System.out.println("Password incorrect for user: " + username);
         return Result.error("密码错误");
-        }
+    }
     @GetMapping ("/userInfo")
     public Result<User> userInfo() {
         Map<String,Object> map= ThreadLocalUtil.get();
