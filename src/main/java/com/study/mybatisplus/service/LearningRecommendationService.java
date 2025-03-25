@@ -1,7 +1,9 @@
 package com.study.mybatisplus.service;
 
 import com.study.mybatisplus.domain.Sign;
+import com.study.mybatisplus.domain.UserLearningStatistics;
 import com.study.mybatisplus.dto.LearningProgressSummary;
+import com.study.mybatisplus.dto.UserLearningStatistics;
 
 import java.util.List;
 
@@ -28,4 +30,11 @@ public interface LearningRecommendationService {
      * @return 包含各项统计数据的对象
      */
     LearningProgressSummary getUserProgressSummary(Integer userId);
+
+    /**
+     * 获取用户的详细学习统计数据
+     * @param userId 用户ID
+     * @return 详细的学习统计信息
+     */
+    UserLearningStatistics getUserLearningStatistics(Integer userId);
 }

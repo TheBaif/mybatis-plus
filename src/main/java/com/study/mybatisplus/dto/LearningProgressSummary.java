@@ -10,7 +10,13 @@ public class LearningProgressSummary {
     // 已学习的手语总数
     private Integer totalSigns;
 
-    // 熟练掌握的手语数量
+    // 未学习的手语数量（只有通过计算得到，不在记录中）
+    private Integer notLearnedCount;
+
+    // 未复习的手语数量（熟练度 >= 30 && < 70）
+    private Integer notReviewedCount;
+
+    // 已掌握的手语数量（熟练度 >= 70）
     private Integer masteredSigns;
 
     // 平均熟练度
