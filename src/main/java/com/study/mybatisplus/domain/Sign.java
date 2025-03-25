@@ -33,4 +33,16 @@ public class Sign implements Serializable {
     @TableField("wordVideoSrc")
     private String wordVideoSrc;
 
+    // 掌握度/难度字段
+    private String difficulty;
+
+    // 额外添加虚拟字段，不映射到数据库
+    @TableField(exist = false)
+    private String masteryLevel;
+
+    // 学习记录统计相关
+    @TableField(exist = false)
+    private Integer proficiencyScore;
+    @TableField(exist = false)
+    private Integer viewCount;
 }

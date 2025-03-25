@@ -1,9 +1,8 @@
 package com.study.mybatisplus.service;
 
 import com.study.mybatisplus.domain.Sign;
-import com.study.mybatisplus.domain.UserLearningStatistics;
-import com.study.mybatisplus.dto.LearningProgressSummary;
 import com.study.mybatisplus.dto.UserLearningStatistics;
+import com.study.mybatisplus.dto.LearningProgressSummary;
 
 import java.util.List;
 

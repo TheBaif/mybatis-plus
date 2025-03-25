@@ -1,4 +1,4 @@
-package com.study.mybatisplus.domain;
+package com.study.mybatisplus.dto;
 
 import com.study.mybatisplus.dto.WeeklyLearningData;
 import lombok.Data;

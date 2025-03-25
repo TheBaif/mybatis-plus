@@ -3,14 +3,12 @@ package com.study.mybatisplus.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.study.mybatisplus.domain.Sign;
 import com.study.mybatisplus.domain.UserLearningRecord;
-import com.study.mybatisplus.domain.UserLearningStatistics;
 import com.study.mybatisplus.dto.LearningProgressSummary;
 import com.study.mybatisplus.dto.UserLearningStatistics;
 import com.study.mybatisplus.dto.WeeklyLearningData;
 import com.study.mybatisplus.mapper.SignMapper;
 import com.study.mybatisplus.mapper.UserLearningRecordMapper;
 import com.study.mybatisplus.service.LearningRecommendationService;
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -122,9 +120,12 @@ public class LearningRecommendationServiceImpl implements LearningRecommendation
         for (Sign sign : recommendedSigns) {
             if (signProficiencyMap.containsKey(sign.getId())) {
                 int proficiency = signProficiencyMap.get(sign.getId());
-                sign.setDifficulty(getMasteryLevel(proficiency));
+                sign.setMasteryLevel(getMasteryLevel(proficiency));
+                // 将掌握度分数添加到Sign对象中，方便前端使用
+                sign.setProficiencyScore(proficiency);
             } else {
-                sign.setDifficulty("未学习");
+                sign.setMasteryLevel("未学习");
+                sign.setProficiencyScore(0);
             }
         }
 
@@ -238,7 +239,7 @@ public class LearningRecommendationServiceImpl implements LearningRecommendation
         return summary;
     }
 
-    @Resource
+    @Override
     public UserLearningStatistics getUserLearningStatistics(Integer userId) {
         // 获取用户的所有学习记录
         List<UserLearningRecord> records = learningRecordMapper.selectByUserId(userId);
