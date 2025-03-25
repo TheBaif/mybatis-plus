@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class LearningRecommendationServiceImpl implements LearningRecommendationService {
-    
+
     @Autowired
     private UserLearningRecordMapper learningRecordMapper;
 

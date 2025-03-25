@@ -74,9 +74,17 @@ public class SignController {
         List<Sign> results = signService.searchSigns(keyword);
         return Result.success(results);
     }
-    @GetMapping("/sign/detail/{id}")
-    public Result getSignDetail(@PathVariable Long id) {
+    @GetMapping("/detail/{id}")
+    public Result getSignDetail(@PathVariable Integer id) {
+        if (id == null) {
+            return Result.error("ID参数不能为空");
+        }
+
         Sign sign = signService.getById(id);
+        if (sign == null) {
+            return Result.error("未找到相关手语信息");
+        }
+
         return Result.success(sign);
     }
 }
