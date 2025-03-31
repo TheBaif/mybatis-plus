@@ -49,4 +49,6 @@ public interface TestService {
      * @param options 选项列表
      */
     void addTestOptions(Integer questionId, List<com.study.mybatisplus.dto.TestOptionDTO> options);
+
+    void generateMockQuestions(int count);
 }

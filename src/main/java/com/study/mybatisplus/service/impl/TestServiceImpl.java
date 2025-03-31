@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,14 +52,18 @@ public class TestServiceImpl implements TestService {
         } else if (categoryId != null) {
             questions = testQuestionMapper.selectRandomQuestionsByCategory(categoryId, limit);
         } else {
-            // 基于用户学习进度推荐题目
             questions = testQuestionMapper.selectRandomQuestionsByUserProgress(userId, limit);
-
+        }
             // 如果没有足够的题目，补充随机题目
-            if (questions.size() < limit) {
-                int remainingCount = limit - questions.size();
-                List<TestQuestion> additionalQuestions = testQuestionMapper.selectRandomQuestionsByDifficulty("BEGINNER", remainingCount);
-                questions.addAll(additionalQuestions);
+        if (questions.isEmpty()) {
+            generateMockQuestions(limit);
+            // 再次尝试获取
+            if (difficulty != null && !difficulty.isEmpty()) {
+                questions = testQuestionMapper.selectRandomQuestionsByDifficulty(difficulty, limit);
+            } else if (categoryId != null) {
+                questions = testQuestionMapper.selectRandomQuestionsByCategory(categoryId, limit);
+            } else {
+                questions = testQuestionMapper.selectRandomQuestionsByUserProgress(userId, limit);
             }
         }
 
@@ -224,6 +226,37 @@ public class TestServiceImpl implements TestService {
             option.setCreateTime(now);
             option.setUpdateTime(now);
             testOptionMapper.insert(option);
+        }
+    }
+
+    @Override
+    public void generateMockQuestions(int count) {
+        Random random = new Random();
+
+        for (int i = 0; i < count; i++) {
+            // 创建一个新的题目对象
+            TestQuestion question = new TestQuestion();
+            question.setQuestion("示例题目 " + (i + 1));
+
+            // 随机设置一些属性
+            question.setDifficulty(random.nextInt(3) == 0 ? "EASY" : (random.nextInt(3) == 1 ? "MEDIUM" : "HARD"));
+
+            // 设置创建和更新时间为当前时间
+            LocalDateTime now = LocalDateTime.now();
+            question.setCreateTime(now);
+            question.setUpdateTime(now);
+
+            // 保存到数据库
+            testQuestionMapper.insert(question);
+
+            // 为题目生成选项
+            for (int j = 0; j < 4; j++) {
+                TestOption option = new TestOption();
+                option.setQuestionId(question.getId());
+                option.setText("选项 " + (char)('A' + j));
+                option.setIsCorrect(j == 0);  // 第一个选项设为正确答案
+                testOptionMapper.insert(option);
+            }
         }
     }
 

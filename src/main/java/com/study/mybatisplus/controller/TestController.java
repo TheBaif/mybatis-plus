@@ -129,4 +129,10 @@ public class TestController {
             return null;
         }
     }
+
+    @PostMapping("/mock")
+    public Result<Void> generateMockQuestions(@RequestParam int count) {
+        testService.generateMockQuestions(count);
+        return Result.success();
+    }
 }
